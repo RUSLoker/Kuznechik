@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(Kuznyechik C)
+project(Kuznechik C)
 
 set(CMAKE_C_STANDARD 17)
 
@@ -18,7 +18,7 @@ add_compile_options(
 add_library(encryption STATIC funcs.c)
 target_include_directories(encryption PUBLIC include)
 
-add_executable(kuznyechik main.c)
-target_link_libraries(kuznyechik encryption)
+add_executable(kuznechik main.c)
+target_link_libraries(kuznechik encryption)
 
 add_subdirectory(testing)
