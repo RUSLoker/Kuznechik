@@ -255,7 +255,7 @@ struct pair_uint128 f_transform(unsigned __int128 k, struct pair_uint128 a) {
     return result;
 }
 
-void key_shedule(struct pair_uint128 key, unsigned __int128 K[10]) {
+void key_shedule(key256_t key, unsigned __int128 K[10]) {
     unsigned __int128 C[32];
     for (unsigned __int128 i = 0; i < 32; ++i) {
         C[i] = l_transform(i + 1);
@@ -273,7 +273,7 @@ void key_shedule(struct pair_uint128 key, unsigned __int128 K[10]) {
     }
 }
 
-unsigned __int128 encrypt(struct pair_uint128 key, unsigned __int128 a) {
+unsigned __int128 encrypt(key256_t key, unsigned __int128 a) {
     unsigned __int128 K[10];
     key_shedule(key, K);
 
@@ -284,7 +284,7 @@ unsigned __int128 encrypt(struct pair_uint128 key, unsigned __int128 a) {
     return a;
 }
 
-unsigned __int128 decrypt(struct pair_uint128 key, unsigned __int128 a) {
+unsigned __int128 decrypt(key256_t key, unsigned __int128 a) {
     unsigned __int128 K[10];
     key_shedule(key, K);
 
