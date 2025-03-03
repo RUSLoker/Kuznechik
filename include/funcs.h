@@ -53,13 +53,15 @@ struct pair_uint128 {
 
 typedef struct pair_uint128 key256_t;
 
+typedef unsigned __int128 block_t;
+
 struct pair_uint128 f_transform(unsigned __int128 k, struct pair_uint128 a);
 
 void key_shedule(key256_t key, unsigned __int128 K[10]);
 
-unsigned __int128 encrypt(key256_t key, unsigned __int128 a);
+unsigned __int128 encrypt(key256_t key, block_t a);
 
-unsigned __int128 decrypt(key256_t key, unsigned __int128 a);
+unsigned __int128 decrypt(key256_t key, block_t a);
 
 #ifdef __cplusplus
 }

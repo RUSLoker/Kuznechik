@@ -273,7 +273,7 @@ void key_shedule(key256_t key, unsigned __int128 K[10]) {
     }
 }
 
-unsigned __int128 encrypt(key256_t key, unsigned __int128 a) {
+unsigned __int128 encrypt(key256_t key, block_t a) {
     unsigned __int128 K[10];
     key_shedule(key, K);
 
@@ -284,7 +284,7 @@ unsigned __int128 encrypt(key256_t key, unsigned __int128 a) {
     return a;
 }
 
-unsigned __int128 decrypt(key256_t key, unsigned __int128 a) {
+unsigned __int128 decrypt(key256_t key, block_t a) {
     unsigned __int128 K[10];
     key_shedule(key, K);
 
