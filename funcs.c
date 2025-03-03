@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <constants.h>
-#include <funcs.hpp>
+#include <funcs.h>
 #include <stdio.h>
 #include <string.h>
 

@@ -1,5 +1,5 @@
 #include <constants.h>
-#include <funcs.hpp>
+#include <funcs.h>
 #include <stdbool.h>
 #include <stdio.h>
 
