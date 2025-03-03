@@ -1,4 +1,4 @@
-#include <funcs.hpp>
+#include <funcs.h>
 #include <gtest/gtest.h>
 
 constexpr __uint128_t operator""_uint128(const char *x) {
