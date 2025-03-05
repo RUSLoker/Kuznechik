@@ -11,6 +11,8 @@ constexpr __uint128_t operator""_uint128(const char *x) {
             y += x[i] - 'A' + 10;
         else if ('a' <= x[i] && x[i] <= 'f')
             y += x[i] - 'a' + 10;
+        else
+            assert(false);
     }
     return y;
 }

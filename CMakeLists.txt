@@ -8,6 +8,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_Release ON)
 add_compile_options(
         $<$<CONFIG:Release>:-Ofast>
         $<$<CONFIG:Release>:-march=native>
+        $<$<CONFIG:Release>:-mtune=native>
         $<$<CONFIG:Release>:-funroll-loops>
         $<$<CONFIG:Release>:-falign-functions>
         $<$<CONFIG:Release>:-ffast-math>
@@ -15,7 +16,7 @@ add_compile_options(
         $<$<CONFIG:Release>:-fno-trapping-math>
 )
 
-add_library(encryption STATIC funcs.c)
+add_library(encryption STATIC funcs.c modes/MGM.c)
 target_include_directories(encryption PUBLIC include)
 
 add_executable(kuznechik main.c)
