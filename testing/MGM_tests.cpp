@@ -64,8 +64,9 @@ TEST(MGM, 1) {
     right_cyphered_text.data[1] = 0x8075D2212BF9FD5BD3F7069AADC16B39_uint128;
     right_cyphered_text.data[2] = 0x497AB15915A6BA85936B5D0EA9F6851C_uint128;
     right_cyphered_text.data[3] = 0xC60C14D4D3F883D0AB94420695C76DEB_uint128;
-    right_cyphered_text.data[4] = 0x2C7552_uint128;
+    right_cyphered_text.data[4] = 0x2C755200000000000000000000000000_uint128;
 
-    EXPECT_TRUE(memcmp(result.cyphered_text.data, right_cyphered_text.data, right_cyphered_text.alloc_len) == 0);
-
+    for (uint64_t i = 0; i < right_cyphered_text.alloc_len; ++i) {
+        EXPECT_EQ(result.cyphered_text.data[i], right_cyphered_text.data[i]);
+    }
 }
