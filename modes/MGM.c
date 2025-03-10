@@ -27,8 +27,8 @@ bit_vec_t make_bit_vec(uint64_t size) {
     }
 
     const uint64_t alloc_len = size / BLOCK_BIT_LEN
-                             // extra space for the last incomplete block
-                             + (size % BLOCK_BIT_LEN != 0);
+                               // extra space for the last incomplete block
+                               + (size % BLOCK_BIT_LEN != 0);
 
     const bit_vec_t result = {
         malloc(alloc_len * sizeof(block_t)),
@@ -51,8 +51,8 @@ void delete_bit_vec(bit_vec_t *bit_vec) {
 void bit_vec_append(bit_vec_t *bit_vec, const block_t data, const uint64_t size) {
     const uint64_t new_size = bit_vec->bit_size + size;
     const uint64_t new_alloc_len = new_size / BLOCK_BIT_LEN
-                                 // extra space for the last incomplete block
-                                 + (new_size % BLOCK_BIT_LEN != 0);
+                                   // extra space for the last incomplete block
+                                   + (new_size % BLOCK_BIT_LEN != 0);
     if (bit_vec->alloc_len < new_alloc_len) {
         block_t *new_data = realloc(bit_vec->data, new_alloc_len * sizeof(block_t));
         assert(new_data != NULL);
@@ -123,10 +123,13 @@ MGM_result MGM_Encrypt(key256_t key, block_t nonce, bit_vec_t additional_data, b
                                      + (result.cyphered_text.bit_size % BLOCK_BIT_LEN != 0)) * BLOCK_BIT_LEN;
 
     result.MAC.data[0] = MSB(MAC_size, MGM_make_MAC(key, nonce, result.additional_data, result.cyphered_text));
+
+    return result;
 }
 
 void MGM_apply_cypher(key256_t key, block_t nonce, bit_vec_t plain_text, bit_vec_t *cyphered_text) {
-    block_t Y = encrypt(key, nonce);
+    const block_t nonce_mask = ~(block_t) 0 >> 1;
+    block_t Y = encrypt(key, nonce & nonce_mask);
     const block_t *P = plain_text.data;
     block_t *C = cyphered_text->data;
     for (uint64_t remain_size = plain_text.bit_size; remain_size / BLOCK_BIT_LEN != 0; remain_size -= BLOCK_BIT_LEN) {
@@ -143,6 +146,11 @@ void MGM_apply_cypher(key256_t key, block_t nonce, bit_vec_t plain_text, bit_vec
 }
 
 block_t MGM_make_MAC(key256_t key, block_t nonce, bit_vec_t additional_data, bit_vec_t cyphered_text) {
+    const block_t nonce_leading_one = (block_t) 1 << (BLOCK_BIT_LEN - 1);
+    block_t Z = encrypt(key, nonce | nonce_leading_one);
+
+
+
 
 }
 
@@ -156,8 +164,8 @@ block_t incr_l(block_t block) {
 
 block_t incr_r(block_t block) {
     const uint64_t block_half_size = BLOCK_BIT_LEN / 2;
-    const block_t r_half_mask = ((block_t) 1 << block_half_size) - 1;
-    const block_t l_half_mask = r_half_mask << block_half_size;
+    const block_t r_half_mask = ~(block_t)0 >> block_half_size;
+    const block_t l_half_mask = ~(block_t)0 << block_half_size;
 
     return (block & l_half_mask) | (((block & r_half_mask) + 1) & r_half_mask);
 }

@@ -8,7 +8,7 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-add_executable(tests tests.cpp MGM_tests.cpp)
+add_executable(tests tests.cpp MGM_tests.cpp MGM_funcs_tests.cpp)
 target_link_libraries(tests PRIVATE encryption GTest::GTest GTest::Main)
 target_include_directories(tests PUBLIC include)
 

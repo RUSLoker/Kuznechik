@@ -250,8 +250,8 @@ unsigned __int128 x_transform(unsigned __int128 k, unsigned __int128 a) {
     return k ^ a;
 }
 
-struct pair_uint128 f_transform(unsigned __int128 k, struct pair_uint128 a) {
-    struct pair_uint128 result = {l_transform(s_transform(x_transform(k, a.first))) ^ a.second, a.first};
+pair_uint128 f_transform(unsigned __int128 k, pair_uint128 a) {
+    pair_uint128 result = {l_transform(s_transform(x_transform(k, a.first))) ^ a.second, a.first};
     return result;
 }
 
@@ -264,7 +264,7 @@ void key_shedule(key256_t key, unsigned __int128 K[10]) {
     K[0] = key.first;
     K[1] = key.second;
     for (uint8_t i = 1; i <= 4; ++i) {
-        struct pair_uint128 result = {K[2 * i - 2], K[2 * i - 1]};
+        pair_uint128 result = {K[2 * i - 2], K[2 * i - 1]};
         for (uint8_t j = 0; j < 8; ++j) {
             result = f_transform(C[8 * (i - 1) + j], result);
         }

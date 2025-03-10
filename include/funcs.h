@@ -46,16 +46,16 @@ unsigned __int128 reverce_l_transform(unsigned __int128 a);
 
 unsigned __int128 x_transform(unsigned __int128 k, unsigned __int128 a);
 
-struct pair_uint128 {
+typedef struct {
     unsigned __int128 first;
     unsigned __int128 second;
-};
+} pair_uint128;
 
-typedef struct pair_uint128 key256_t;
+typedef pair_uint128 key256_t;
 
 typedef unsigned __int128 block_t;
 
-struct pair_uint128 f_transform(unsigned __int128 k, struct pair_uint128 a);
+pair_uint128 f_transform(unsigned __int128 k, pair_uint128 a);
 
 void key_shedule(key256_t key, unsigned __int128 K[10]);
 

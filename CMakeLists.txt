@@ -16,7 +16,8 @@ add_compile_options(
         $<$<CONFIG:Release>:-fno-trapping-math>
 )
 
-add_library(encryption STATIC funcs.c modes/MGM.c)
+add_library(encryption STATIC funcs.c modes/MGM.c
+        MGM/funcs.c)
 target_include_directories(encryption PUBLIC include)
 
 add_executable(kuznechik main.c)
