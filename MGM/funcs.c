@@ -1,18 +1,21 @@
 #include <MGM/funcs.h>
 #include <stdint.h>
 
-pair_uint128 multiply_as_polynoms(const __uint128_t a, const __uint128_t b) {
+pair_uint128 multiply_as_polynomials(const __uint128_t a, const __uint128_t b) {
     pair_uint128 result = {0, 0};
 
-    // for lower part
-    for (__uint128_t i = 0; i < 128; ++i) {
-        __uint128_t mask = -((((__uint128_t)1 << i) & b) >> i);
-        result.first ^= (a << i) & mask;
+    // 0 iteration
+    {
+        __uint128_t mask = -(b & 1);
+
+        result.first ^= a & mask;
     }
 
-    // for higher part
     for (__uint128_t i = 1; i < 128; ++i) {
-        __uint128_t mask = -((((__uint128_t)1 << i) & b) >> i);
+        // iterate over each bit of b
+        __uint128_t mask = -((b >> i) & 1);
+
+        result.first ^= (a << i) & mask;
         result.second ^= (a >> (128 - i)) & mask;
     }
 
@@ -77,4 +80,16 @@ pair_uint128 poly256_remainder(pair_uint128 a, pair_uint128 b) {
     }
 
     return a;
+}
+
+unsigned __int128 get_gost_remainder_poly256(pair_uint128 poly) {
+    pair_uint128 gost_remainder = {
+        .first = (1 << 7) | (1 << 2) | (1 << 1) | 1,
+        .second = 1
+    };
+    return poly256_remainder(poly, gost_remainder).first;
+}
+
+block_t multyply_blocks(block_t a, block_t b) {
+    return get_gost_remainder_poly256(multiply_as_polynomials(a, b));
 }

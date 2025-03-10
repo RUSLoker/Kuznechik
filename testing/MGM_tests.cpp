@@ -55,18 +55,36 @@ TEST(MGM, 1) {
     plain_text.data[3] = 0x2233445566778899AABBCCEEFF0A0011_uint128;
     plain_text.data[4] = 0xAABBCC00000000000000000000000000_uint128;
 
-    uint64_t MAC_size = 32;
+    uint64_t MAC_size = 128;
 
     MGM_result result = MGM_Encrypt(key, nonce, additional_data, plain_text, MAC_size);
 
-    bit_vec_t right_cyphered_text = make_bit_vec(536);
-    right_cyphered_text.data[0] = 0xA9757B8147956E9055B8A33DE89F42FC_uint128;
-    right_cyphered_text.data[1] = 0x8075D2212BF9FD5BD3F7069AADC16B39_uint128;
-    right_cyphered_text.data[2] = 0x497AB15915A6BA85936B5D0EA9F6851C_uint128;
-    right_cyphered_text.data[3] = 0xC60C14D4D3F883D0AB94420695C76DEB_uint128;
-    right_cyphered_text.data[4] = 0x2C755200000000000000000000000000_uint128;
+    bit_vec_t expected_cyphered_text = make_bit_vec(640);
+    expected_cyphered_text.data[0] = 0xA9757B8147956E9055B8A33DE89F42FC_uint128;
+    expected_cyphered_text.data[1] = 0x8075D2212BF9FD5BD3F7069AADC16B39_uint128;
+    expected_cyphered_text.data[2] = 0x497AB15915A6BA85936B5D0EA9F6851C_uint128;
+    expected_cyphered_text.data[3] = 0xC60C14D4D3F883D0AB94420695C76DEB_uint128;
+    expected_cyphered_text.data[4] = 0x2C755200000000000000000000000000_uint128;
 
-    for (uint64_t i = 0; i < right_cyphered_text.alloc_len; ++i) {
-        EXPECT_EQ(result.cyphered_text.data[i], right_cyphered_text.data[i]);
+    ASSERT_GE(result.cyphered_text.alloc_len, expected_cyphered_text.alloc_len);
+    EXPECT_EQ(result.cyphered_text.bit_size, expected_cyphered_text.bit_size);
+    for (uint64_t i = 0; i < expected_cyphered_text.alloc_len; ++i) {
+        EXPECT_EQ(result.cyphered_text.data[i], expected_cyphered_text.data[i]);
     }
+
+    bit_vec_t expected_additional_data = make_bit_vec(384);
+    expected_additional_data.data[0] = 0x02020202020202020101010101010101_uint128;
+    expected_additional_data.data[1] = 0x04040404040404040303030303030303_uint128;
+    expected_additional_data.data[2] = 0xEA050505050505050500000000000000_uint128;
+
+
+    ASSERT_GE(result.additional_data.alloc_len, expected_additional_data.alloc_len);
+    EXPECT_EQ(result.additional_data.bit_size, expected_additional_data.bit_size);
+    for (uint64_t i = 0; i < expected_additional_data.alloc_len; ++i) {
+        EXPECT_EQ(result.additional_data.data[i], expected_additional_data.data[i]);
+    }
+
+    block_t expected_MAC = 0xCF5D656F40C34F5C46E8BB0E29FCDB4C_uint128;
+    EXPECT_EQ(result.MAC.bit_size, (sizeof(block_t) * 8));
+    EXPECT_EQ(result.MAC.data[0], expected_MAC);
 }

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <MGM/funcs.h>
 
 
 #define BLOCK_BIT_LEN (sizeof(block_t) * 8)
@@ -12,7 +13,8 @@
 
 void MGM_apply_cypher(key256_t key, block_t nonce, bit_vec_t plain_text, bit_vec_t *cyphered_text);
 
-block_t MGM_make_MAC(key256_t key, block_t nonce, bit_vec_t additional_data, bit_vec_t cyphered_text);
+block_t MGM_make_MAC(key256_t key, block_t nonce, bit_vec_t additional_data, bit_vec_t cyphered_text, uint64_t len_A,
+                     uint64_t len_C);
 
 block_t incr_l(block_t block);
 
@@ -116,13 +118,25 @@ MGM_result MGM_Encrypt(key256_t key, block_t nonce, bit_vec_t additional_data, b
 
     MGM_apply_cypher(key, nonce, plain_text, &result.cyphered_text);
 
+    uint64_t len_C = result.cyphered_text.bit_size;
+
     // append additional data and cyphered text to complete blocks by zeros
     result.additional_data.bit_size = ((result.additional_data.bit_size / BLOCK_BIT_LEN)
                                        + (result.additional_data.bit_size % BLOCK_BIT_LEN != 0)) * BLOCK_BIT_LEN;
     result.cyphered_text.bit_size = ((result.cyphered_text.bit_size / BLOCK_BIT_LEN)
                                      + (result.cyphered_text.bit_size % BLOCK_BIT_LEN != 0)) * BLOCK_BIT_LEN;
 
-    result.MAC.data[0] = MSB(MAC_size, MGM_make_MAC(key, nonce, result.additional_data, result.cyphered_text));
+    result.MAC.data[0] = MSB(
+        MAC_size,
+        MGM_make_MAC(
+            key,
+            nonce,
+            result.additional_data,
+            result.cyphered_text,
+            additional_data.bit_size,
+            len_C
+        )
+    );
 
     return result;
 }
@@ -145,13 +159,35 @@ void MGM_apply_cypher(key256_t key, block_t nonce, bit_vec_t plain_text, bit_vec
     }
 }
 
-block_t MGM_make_MAC(key256_t key, block_t nonce, bit_vec_t additional_data, bit_vec_t cyphered_text) {
+block_t MGM_make_MAC(const key256_t key,
+                     const block_t nonce,
+                     const bit_vec_t additional_data,
+                     const bit_vec_t cyphered_text,
+                     const uint64_t len_A,
+                     const uint64_t len_C) {
     const block_t nonce_leading_one = (block_t) 1 << (BLOCK_BIT_LEN - 1);
     block_t Z = encrypt(key, nonce | nonce_leading_one);
 
+    block_t result = 0;
 
+    for (uint64_t i = 0; i < additional_data.bit_size / BLOCK_BIT_LEN; i++) {
+        block_t H = encrypt(key, Z);
+        result ^= multyply_blocks(H, additional_data.data[i]);
 
+        Z = incr_l(Z);
+    }
 
+    for (uint64_t i = 0; i < cyphered_text.bit_size / BLOCK_BIT_LEN; i++) {
+        block_t H = encrypt(key, Z);
+        result ^= multyply_blocks(H, cyphered_text.data[i]);
+
+        Z = incr_l(Z);
+    }
+
+    block_t last_term = ((block_t)len_A << BLOCK_BIT_LEN / 2) | len_C;
+    result ^= multyply_blocks(encrypt(key, Z), last_term);
+
+    return encrypt(key, result);
 }
 
 
@@ -164,8 +200,8 @@ block_t incr_l(block_t block) {
 
 block_t incr_r(block_t block) {
     const uint64_t block_half_size = BLOCK_BIT_LEN / 2;
-    const block_t r_half_mask = ~(block_t)0 >> block_half_size;
-    const block_t l_half_mask = ~(block_t)0 << block_half_size;
+    const block_t r_half_mask = ~(block_t) 0 >> block_half_size;
+    const block_t l_half_mask = ~(block_t) 0 << block_half_size;
 
     return (block & l_half_mask) | (((block & r_half_mask) + 1) & r_half_mask);
 }

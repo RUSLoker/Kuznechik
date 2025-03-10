@@ -2,11 +2,51 @@
 #include <MGM/funcs.h>
 #include <gtest/gtest.h>
 
+TEST(polynomial_multiplication, by_zero) {
+    __uint128_t a = ~__uint128_t(0);
+    __uint128_t b = 0;
+
+    pair_uint128 result = multiply_as_polynomials(a, b);
+
+    pair_uint128 expected_result{0, 0};
+
+    EXPECT_EQ(result.first, expected_result.first);
+    EXPECT_EQ(result.second, expected_result.second);
+
+    result = multiply_as_polynomials(b, a);
+
+    EXPECT_EQ(result.first, expected_result.first);
+    EXPECT_EQ(result.second, expected_result.second);
+}
+
+static pair_uint128 multiply_naive(const __uint128_t a, const __uint128_t b) {
+    pair_uint128 prod = {0, 0};
+    for (unsigned i = 0; i < 128; i++) {
+        if ((b >> i) & 1) {
+            prod.first ^= a << i;
+            if (i) prod.second ^= a >> (128 - i);
+        }
+    }
+    return prod;
+}
+
+TEST(polynomial_multiplication, all_ones) {
+    __uint128_t a = ~__uint128_t(0);
+    __uint128_t b = ~__uint128_t(0);
+
+    pair_uint128 result = multiply_as_polynomials(a, b);
+
+    pair_uint128 expected_result = multiply_naive(a, b);
+
+    EXPECT_EQ(result.first, expected_result.first);
+    EXPECT_EQ(result.second, expected_result.second);
+}
+
 TEST(polynomial_multiplication, 1) {
     __uint128_t a = __uint128_t(1) << 127 | __uint128_t(1);
     __uint128_t b = __uint128_t(1) << 127 | __uint128_t(1);
 
-    const pair_uint128 result = multiply_as_polynoms(a, b);
+    const pair_uint128 result = multiply_as_polynomials(a, b);
 
     pair_uint128 right_result{__uint128_t(1), __uint128_t(1) << 126};
 
@@ -18,7 +58,7 @@ TEST(polynomial_multiplication, 2) {
     __uint128_t a = __uint128_t(1) << 127 | __uint128_t(1) << 31 | __uint128_t(1) << 5 | __uint128_t(1);
     __uint128_t b = __uint128_t(1) << 127 | __uint128_t(1) << 34 | __uint128_t(1) << 29 | __uint128_t(1) << 3;
 
-    const pair_uint128 result = multiply_as_polynoms(a, b);
+    const pair_uint128 result = multiply_as_polynomials(a, b);
 
     pair_uint128 right_result{
         __uint128_t(1) << 3 |
@@ -39,6 +79,23 @@ TEST(polynomial_multiplication, 2) {
 
     EXPECT_EQ(result.first, right_result.first);
     EXPECT_EQ(result.second, right_result.second);
+}
+
+__uint128_t random128() {
+    uint64_t hi = ((uint64_t)rand() << 32) | (uint64_t)rand();
+    uint64_t lo = ((uint64_t)rand() << 32) | (uint64_t)rand();
+    return (((__uint128_t)hi) << 64) | lo;
+}
+
+TEST(polynomial_multiplication, random) {
+    srand(34534532452345);
+    for (int i = 0; i < 100000; i++) {
+        __uint128_t a = random128(), b = random128();
+        pair_uint128 res1 = multiply_as_polynomials(a, b);
+        pair_uint128 res2 = multiply_naive(a, b);
+        EXPECT_EQ(res1.first, res2.first);
+        EXPECT_EQ(res1.second, res2.second);
+    }
 }
 
 TEST(polynomial_remainder, 1) {
