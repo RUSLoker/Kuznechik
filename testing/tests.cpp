@@ -39,7 +39,7 @@ TEST(Transforms, L) {
 }
 
 TEST(KeyShedule, 1) {
-    pair_uint128 key = {0x8899aabbccddeeff0011223344556677_uint128, 0xfedcba98765432100123456789abcdef_uint128};
+    key256_t key = {0x8899aabbccddeeff0011223344556677_uint128, 0xfedcba98765432100123456789abcdef_uint128};
     __uint128_t K[10];
     key_shedule(key, K);
 
